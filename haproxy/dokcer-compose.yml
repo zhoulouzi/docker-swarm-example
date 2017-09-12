@@ -1,0 +1,41 @@
+version: "3"
+services:
+  lb:
+    image: reg.example.cn/library/dockercloud-haproxy:1.6.7
+    networks: 
+      - haproxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "1936:1936"
+    environment:
+      - STATS_AUTH=admin:8ql6,yhY
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      update_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: pause
+        monitor: 15s
+        max_failure_ratio: 0.3
+      restart_policy:
+        condition: on-failure
+        delay: 5s 
+        max_attempts: 3
+        window: 15s
+
+networks:
+  haproxy:
+    driver: overlay

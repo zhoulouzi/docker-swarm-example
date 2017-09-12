@@ -1,0 +1,52 @@
+global:
+  resolve_timeout: 1m
+  smtp_smarthost: 'smtp.exmail.qq.com:465'
+  smtp_from: 'fengxu@xiaoneng.cn'
+  smtp_auth_username: 'fengxu@xiaoneng.cn'
+  smtp_auth_password: 'ucVJ06!('
+
+route:
+  group_by: ['alertname', 'instance']
+  group_wait: 5s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'webhook'
+  routes:
+    - receiver: 'meizu_alertway'
+      group_by: ['alertname', ]
+      match_re:
+        instance: meizu.*
+
+receivers:
+- name: 'webhook'
+  webhook_configs:
+  - url: 'http://alerta-web/api/webhooks/prometheus'
+    send_resolved: true
+- name: 'email'
+  email_configs:
+  - to: 'fengxu@xiaoneng.cn'
+- name: 'email_zhouzichen'
+  email_configs:
+  - send_resolved: false
+    to: 'zhouzichen@xiaoneng.cn'
+    from: 'zhouzichen@xiaoneng.cn'
+    smarthost: 'smtp.exmail.qq.com:587'
+    auth_username: 'zhouzichen@xiaoneng.cn'
+    auth_password: '0408Inlove'
+  webhook_configs:
+  - send_resolved: false
+    url: 'http://192.168.30.142:8080/prometheus'
+
+# meizu alertway
+- name: 'meizu_alertway'
+  email_configs:
+  - send_resolved: false
+    to: 'yunwei@xiaoneng.cn'
+    from: 'sport@xiaoneng.cn'
+    smarthost: 'smtp.exmail.qq.com:587'
+    auth_username: 'sport@xiaoneng.cn'
+    auth_password: 'xiaoneng.2015'
+  webhook_configs:
+  - send_resolved: false
+    url: 'http://192.168.30.142:8080/prometheus'
+   

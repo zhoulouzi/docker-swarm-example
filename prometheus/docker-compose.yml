@@ -1,0 +1,134 @@
+version: "3.3"
+services:
+  prometheus:
+    image: prom/prometheus:v1.7.1
+    networks:
+      - haproxy
+    command: -config.file=/etc/prometheus/prometheus.yml -storage.local.path=/prometheus -web.console.libraries=/usr/share/prometheus/console_libraries -web.console.templates=/usr/share/prometheus/consoles -alertmanager.url=http://alertmanager:9093 -web.external-url=http://prometheus.example.cn/
+    configs:
+      - source: prometheus_main_conf 
+        target: /etc/prometheus/prometheus.yml
+      - source: prometheus_recoding_conf
+        target: /etc/prometheus/recoding.rules
+      - source: prometheus_meizu_conf
+        target: /etc/prometheus/meizu.rules
+      - source: prometheus_learing_conf
+        target: /etc/prometheus/learing.rules   
+    volumes:
+      - /data/prometheus:/prometheus
+    environment:
+      - SERVICE_PORTS=9090
+      - VIRTUAL_HOST=prometheus.example.cn
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [ APP=Prometheus ]
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.labels.xn_role ==  data ]
+
+  grafana:
+    image: grafana/grafana:4.4.3
+    networks:
+      - haproxy
+    volumes:
+      - /data/grafana:/var/lib/grafana
+    environment:
+      - SERVICE_PORTS=3000
+      - VIRTUAL_HOST=grafana.example.cn
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [ APP=Grafana ]
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.labels.xn_role ==  data ]
+
+  alertmanager:
+    image: prom/alertmanager:v0.8.0
+    networks:
+      - haproxy
+    command: -config.file=/etc/alertmanager/config.yml -web.external-url http://alertmanager.example.cn/
+    configs:
+      - source: alertmanager_conf
+        target: /etc/alertmanager/config.yml
+    volumes:
+      - /data/alertmanager:/alertmanager
+    environment:
+      - SERVICE_PORTS=9093
+      - VIRTUAL_HOST=alertmanager.example.cn
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [ APP=alertmanager ]
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.labels.xn_role ==  data ]
+
+
+networks:
+  haproxy:
+    external:
+      name: haproxy_haproxy
+
+configs:
+  alertmanager_conf:
+    file: /root/docker-compose-v3/prometheus/alertmanager/config.yml
+  prometheus_main_conf:
+    file: /root/docker-compose-v3/prometheus/prometheus/config/prometheus.yml
+  prometheus_recoding_conf:
+    file: /root/docker-compose-v3/prometheus/prometheus/config/recoding.rules
+  prometheus_meizu_conf:
+    file: /root/docker-compose-v3/prometheus/prometheus/config/meizu.rules
+  prometheus_learing_conf:
+    file: /root/docker-compose-v3/prometheus/prometheus/config/learning.rules
+
+

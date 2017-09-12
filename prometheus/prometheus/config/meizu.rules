@@ -1,0 +1,46 @@
+ALERT InstanceStatus
+  IF up{job=~"meizu.*"} == 0
+  FOR 10s
+  LABELS {
+    state = "down",
+  }
+  ANNOTATIONS {
+    summary = " {{ $labels.instance }} is down",
+    description = " {{ $labels.instance }} 已经宕机10s."
+  }
+
+ALERT DiskUsage
+  IF 100 * node_filesystem_free{job=~"meizu.*"} / node_filesystem_size{job=~"meizu.*"} < 15 
+  FOR 5s
+  LABELS {
+    Free = "{{ $value }}%",
+  }
+  ANNOTATIONS {
+    summary = " {{ $labels.instance }} filesystem free is not enough",
+    description = " {{ $labels.instance }} current free filesystem size percent is  {{ $value }} %"
+  }
+
+ALERT MemUsage
+  IF 100 * ( node_memory_MemFree{job=~"meizu.*"} + node_memory_Cached{job=~"meizu.*"} + node_memory_Buffers{job=~"meizu.*"} ) / node_memory_MemTotal{job=~"meizu.*"} < 10
+  FOR 5s
+  LABELS {
+     FreeAvailable = "{{ $value }} %"
+  }
+  ANNOTATIONS {
+      summary = "Instance {{ $labels.instance }} Mem is not enough ",
+      description = "{{ $labels.instance }}  Mem available is {{ $value }}% ",
+  }
+
+# ALERT use both node_exporter and cAdvisor
+
+ALERT high_load_per_core_for_1m
+   IF node_load1{job=~"meizu.*"} / on(instance) node_cpu_cores{instance=~"meizu.*"} > 3
+   FOR 1m
+   LABELS {
+     LoadValue = "{{ $value }}"
+   }
+   ANNOTATIONS {
+      summary = "Instance {{ $labels.instance }} under high load",
+      description = "{{ $labels.instance }} current cpu loads is {{ $value }}",
+   }
+

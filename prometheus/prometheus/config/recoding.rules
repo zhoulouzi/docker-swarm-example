@@ -1,0 +1,9 @@
+# use for identify the node ip
+node_host = sum(label_replace(node_boot_time, "host", "$1", "instance", `([\d\.]+):[\d\.]+`)) by (host)
+
+# use for frequently queries from Grafana 
+
+
+
+# user for count node_exporter cpu cores for meizu
+node_cpu_cores = count(node_cpu{job=~"meizu.*",mode=~"system"} ) by (instance) 

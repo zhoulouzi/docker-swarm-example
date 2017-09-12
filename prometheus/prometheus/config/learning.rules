@@ -1,0 +1,59 @@
+ALERT InstanceStatus
+  IF up{job="node"} == 0
+  FOR 10s
+  LABELS {
+    value = "{{ $value}}",
+  }
+  ANNOTATIONS {
+    summary = "服务器  运行状态",
+    description = "服务器  已当机超过 20s"
+  }
+
+# ALERT use node_exporter
+
+ALERT DiskUsage
+  IF 100.00 - 100 * node_filesystem_free{device="/dev/sda1"} / node_filesystem_size{device="/dev/sda1"} < 15 
+  FOR 5s
+  LABELS {
+    value = "{{ $value }}",
+    instance = "{{ $labels.instance }}"
+  }
+  ANNOTATIONS {
+    summary = "node: {{ $labels.instance }} current free filesystem size percent is  {{ $value }}",
+    description = ""
+  }
+
+ALERT MemUsage
+  IF 100.00 -  100 * ( node_memory_MemFree + node_memory_Cached + node_memory_Buffers ) / node_memory_MemTotal < 10
+  FOR 5s
+  LABELS {
+    value = "{{ $value }}"
+  }
+  ANNOTATIONS {
+      summary = "Instance {{ $labels.instance }} Mem is not enough ",
+      description = "{{ $labels.instance }} of job {{ $labels.job }} is not enough.",
+  }
+
+# ALERT use both node_exporter and cAdvisor
+
+ALERT high_load_per_core_for_1m
+   IF node_load1 / on(node_host) machine_cpu_cores > 3
+   FOR 1m
+   LABELS {
+     value = "{{ $value }}"
+   }
+   ANNOTATIONS {
+      summary = "Instance {{ $labels.node_host }} under high load",
+      description = "{{ $labels.node_host }} of job {{ $labels.job }} is under high load.",
+   }
+
+
+
+
+
+
+
+
+
+
+

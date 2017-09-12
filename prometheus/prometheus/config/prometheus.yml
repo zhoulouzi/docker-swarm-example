@@ -1,0 +1,161 @@
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  external_labels:
+    monitor: 'xiaoneng-monitor-prometheus'
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.200:31080','192.168.30.201:31080','192.168.30.209:31080','192.168.30.210:31080','192.168.30.211:31080','192.168.30.214:31080','192.168.30.215:31080', '192.168.30.239:31080', '192.168.30.195:31080', '192.168.30.196:31080', '192.168.30.202:31080', '192.168.30.203:31080', '192.168.30.108:31080', '192.168.30.156:31080']
+    relabel_configs:
+      -  source_labels: [__address__]
+         target_label: node_host
+         regex: ([\d\.]+):[\d\.]+
+
+  - job_name: 'mesos-slave'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.200:31081','192.168.30.201:31081','192.168.30.209:31081','192.168.30.210:31081','192.168.30.211:31081','192.168.30.214:31081','192.168.30.215:31081', '192.168.30.239:31081', '192.168.30.195:31081', '192.168.30.196:31081', '192.168.30.202:31081', '192.168.30.203:31081', '192.168.30.108:31081', '192.168.30.156:31081']
+
+  - job_name: 'mesos-master'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.209:31082']
+
+  - job_name: 'node'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.30.200:9100','192.168.30.201:9100','192.168.30.209:9100','192.168.30.210:9100','192.168.30.211:9100','192.168.30.214:9100','192.168.30.215:9100', '192.168.30.239:9100', '192.168.30.195:9100', '192.168.30.202:9100', '192.168.30.203:9100', '192.168.30.108:9100', '192.168.30.156:9100']
+        labels:
+           node_text_label: 'node_scarpe_label_config'
+    relabel_configs:
+      -  source_labels: [__address__]
+         target_label: node_host
+         regex: ([\d\.]+):[\d\.]+
+# node_exporter swarm.xiaoneng.cn group jobs
+  - job_name: 'swarm_xiaoneng_node'
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names:
+          - 'swarm.xiaoneng.cn'
+        type: 'A'
+        port: 9100
+
+# cadvisor swarm.xiaoneng.cn group jobs
+  - job_name: 'swarm_xiaoneng_cadvisor'
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names:
+          - 'swarm.xiaoneng.cn'
+        type: 'A'
+        port: 18080
+ 
+# meizu monitor group jobs
+  - job_name: 'meizu_web1'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /web1/metrics
+  - job_name: 'meizu_web2'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /web2/metrics
+  - job_name: 'meizu_java1'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /java1/metrics
+  - job_name: 'meizu_java2'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /java2/metrics
+  - job_name: 'meizu_mysql-m'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /mysql-m/metrics
+  - job_name: 'meizu_mysql-s'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /mysql-s/metrics
+  - job_name: 'meizu_mongo'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /mongo/metrics
+  - job_name: 'meizu_haproxy1'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /haproxy1/metrics
+  - job_name: 'meizu_haproxy2'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['119.23.36.230:8078', ]
+    relabel_configs:
+      - source_labels: [job]
+        target_label: instance
+      - source_labels: [job]
+        target_label: job
+        regex: (meizu).*
+    metrics_path: /haproxy2/metrics
+
+rule_files:
+  - 'meizu.rules'
+  - 'recoding.rules'

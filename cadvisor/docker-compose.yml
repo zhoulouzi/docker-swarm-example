@@ -1,0 +1,36 @@
+version: "3.3"
+services:
+  cadvisor:
+    image: google/cadvisor:v0.27.0
+    ports: 
+      - target: 8080
+        published: 18080
+        protocol: tcp
+        mode: host
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk/ro
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+
+

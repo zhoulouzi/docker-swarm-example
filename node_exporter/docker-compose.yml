@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  node_exporter:
+    image: prom/node-exporter:v0.14.0
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+        mode: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command: ["--collector.procfs", "/host/proc", "--collector.sysfs", "/host/sys", "--collector.filesystem.ignored-mount-points", "^/(sys|proc|dev|host|etc)($$|/)"]
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+

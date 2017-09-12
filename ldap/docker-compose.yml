@@ -1,0 +1,92 @@
+version: "3"
+services:
+  ldapserver:
+    image: reg.example.cn/devops/ldap:v1.4
+    networks:
+      - haproxy
+    deploy:
+      mode: replicated
+      replicas: 3
+      labels: [APP=LDAP]
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 512M
+        reservations:
+          cpus: '0.05'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.role == worker]
+  ldapclient:
+    image: reg.example.cn/devops/ldapclient:v1.3
+    networks:
+      - haproxy
+    environment:
+    - BASE_URI=http://ldapserver.example.cn
+    - SERVICE_PORTS=80
+    - VIRTUAL_HOST=account.example.cn,ldapserver.example.cn
+    deploy:
+      mode: replicated
+      replicas: 3
+      labels: [APP=LDAP]
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 512M
+        reservations:
+          cpus: '0.05'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.role == worker]
+  redis:
+    image: reg.example.cn/library/redis:3.2.4
+    networks:
+      - haproxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [APP=LDAP]
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 512M
+        reservations:
+          cpus: '0.05'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      placement:
+        constraints: [node.role == worker]
+
+networks:
+  haproxy:
+    external:
+      name: haproxy_haproxy
